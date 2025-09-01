@@ -250,8 +250,8 @@ export function SignInForm(): React.JSX.Element {
 
       console.log('Login successful');
       router.push('/dashboard');
-    } catch (err) {
-      console.error('Unexpected error:', err);
+    } catch (error) {
+      console.error('Unexpected error:', error);
       setError('root', { type: 'server', message: 'Something went wrong' });
     } finally {
       setIsPending(false);

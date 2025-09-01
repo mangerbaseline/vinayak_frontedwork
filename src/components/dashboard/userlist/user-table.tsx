@@ -1157,9 +1157,9 @@ function UserTableComponent(): JSX.Element {
         alert('Failed to update user: ' + (errorData.message || res.statusText));
         console.error('Update error:', errorData);
       }
-    } catch (err) {
+    } catch (error) {
       alert('Network error while updating user');
-      console.error('Network error:', err);
+      console.error('Network error:', error);
     }
   };
 
@@ -1185,9 +1185,9 @@ function UserTableComponent(): JSX.Element {
         alert('Failed to delete user: ' + (errorData.message || res.statusText));
         console.error('Delete error:', errorData);
       }
-    } catch (err) {
+    } catch (error) {
       alert('Network error while deleting user');
-      console.error('Network error:', err);
+      console.error('Network error:', error);
     }
   };
 

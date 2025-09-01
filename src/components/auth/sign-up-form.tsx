@@ -215,7 +215,7 @@ export function SignUpForm(): React.JSX.Element {
   const onSubmit = React.useCallback(
   async (values: Values) => {
     setIsPending(true);
-    setError('root', {}); // Clear previous root errors
+    setError('root', {}); 
 
     try {
       const res = await fetch('http://localhost:5000/api/users/register', {
@@ -233,12 +233,15 @@ export function SignUpForm(): React.JSX.Element {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (res.ok) {
+          router.push('/login');
+      } 
+      else {
         setError('root', { type: 'server', message: data.message || 'Registration failed' });
-      } else {
-        router.push('/login');
       }
-    } catch (error) {
+
+
+    } catch {
       setError('root', { type: 'server', message: 'Server error. Please try again later.' });
     } finally {
       setIsPending(false);

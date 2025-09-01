@@ -1026,7 +1026,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { JSX, useEffect, useState } from 'react';
 import {
   createSlice,
   createAsyncThunk,

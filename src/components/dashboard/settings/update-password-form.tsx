@@ -91,12 +91,19 @@ export function UpdatePasswordForm(): React.JSX.Element {
       setMessage(data.message); 
       setPassword('');
       setConfirmPassword('');
-    } catch (error: any) {
-      setMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    } 
+     catch (error) {
+
+  if (error instanceof Error) {
+    setMessage(error.message);
+  } 
+  else {
+    setMessage('An unknown error occurred');
+  }
+} finally {
+  setLoading(false);
+}
+  }
 
   return (
     <>

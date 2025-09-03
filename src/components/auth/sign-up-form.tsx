@@ -223,11 +223,11 @@ export function SignUpForm(): React.JSX.Element {
         headers: { 'Content-Type': 'application/json' },
        
         body: JSON.stringify({
-  firstName: values.firstName,
-  lastName: values.lastName,
-  email: values.email,
-  password: values.password,
-}),
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+     }),
 
       });
 
@@ -239,7 +239,6 @@ export function SignUpForm(): React.JSX.Element {
       else {
         setError('root', { type: 'server', message: data.message || 'Registration failed' });
       }
-
 
     } catch {
       setError('root', { type: 'server', message: 'Server error. Please try again later.' });

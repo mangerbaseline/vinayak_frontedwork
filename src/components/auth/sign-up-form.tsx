@@ -234,7 +234,7 @@ export function SignUpForm(): React.JSX.Element {
       const data = await res.json();
 
       if (res.ok) {
-          router.push('/login');
+          router.push('/auth/sign-in');
       } 
       else {
         setError('root', { type: 'server', message: data.message || 'Registration failed' });

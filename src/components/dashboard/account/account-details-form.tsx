@@ -242,7 +242,7 @@
 'use client';
 
 import * as React from 'react';
-import Button from '@mui/material/Button';
+
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -381,7 +381,7 @@ export function AccountDetailsForm(): React.JSX.Element {
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save details</Button>
+          {/* <Button variant="contained">Save details</Button> */}
         </CardActions>
       </Card>
     </form>

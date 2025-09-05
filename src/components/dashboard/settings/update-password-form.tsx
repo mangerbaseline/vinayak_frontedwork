@@ -73,7 +73,7 @@ export function UpdatePasswordForm(): React.JSX.Element {
       const token = localStorage.getItem('token'); 
       if (!token) throw new Error('User not authenticated');
 
-      const response = await fetch('http://localhost:5000/api/users/update-password', {
+      const response = await fetch('https://vinayak-devias-backend-1.onrender.com/api/users/update-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

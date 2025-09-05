@@ -1138,7 +1138,7 @@ function UserTableComponent(): JSX.Element {
     if (!editUser) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${editUser._id}`, {
+      const res = await fetch(`https://vinayak-devias-backend-1.onrender.com/api/users/${editUser._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1172,7 +1172,7 @@ function UserTableComponent(): JSX.Element {
     if (!deleteUser) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${deleteUser._id}`, {
+      const res = await fetch(`https://vinayak-devias-backend-1.onrender.com/api/users/${deleteUser._id}`, {
         method: 'DELETE',
       });
 

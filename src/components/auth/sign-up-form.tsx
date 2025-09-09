@@ -218,7 +218,7 @@ export function SignUpForm(): React.JSX.Element {
     setError('root', {}); 
 
     try {
-      const res = await fetch('https://vinayak-devias-backend-1.onrender.com/api/users/register', {
+      const res = await fetch('http://localhost:5000/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
        
@@ -234,7 +234,7 @@ export function SignUpForm(): React.JSX.Element {
       const data = await res.json();
 
       if (res.ok) {
-          router.push('/login');
+          router.push('/auth/sign-in');
       } 
       else {
         setError('root', { type: 'server', message: data.message || 'Registration failed' });

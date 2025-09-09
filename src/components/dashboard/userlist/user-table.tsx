@@ -1075,7 +1075,7 @@ const initialState: UserState = {
 };
 
 const fetchUsers = createAsyncThunk('users/fetch', async () => {
-  const res = await fetch('https://vinayak-devias-backend-1.onrender.com/api/users');
+  const res = await fetch('http://localhost:5000/api/users');
   if (!res.ok) throw new Error('Failed to fetch users');
   return res.json();
 });

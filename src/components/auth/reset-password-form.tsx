@@ -96,7 +96,7 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth/client';
-import { useRouter } from 'next/navigation';  
+import { useRouter } from 'next/navigation';
 
 const schema = z.object({
   email: z.string().email('Invalid email').min(1, 'Email is required'),
@@ -111,12 +111,12 @@ export function ResetPasswordForm(): React.JSX.Element {
   const [isPending, setIsPending] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
 
-  const router = useRouter();  
+  const router = useRouter();
 
   const {
     control,
     handleSubmit,
-    setError,
+    // setError, // 🧹 Removed because it's unused
     getValues,
     reset,
     formState: { errors },
@@ -130,34 +130,52 @@ export function ResetPasswordForm(): React.JSX.Element {
     setServerError(null);
 
     try {
-      if (step === 1) {
-        const { error } = await authClient.sendOTP({ email: values.email });
-        if (error) throw new Error(error);
-        setStep(2);
-      } else if (step === 2) {
-        const { error } = await authClient.verifyOTP({
-          email: getValues('email'),
-          otp: values.otp || '',
-        });
-        if (error) throw new Error(error);
-        setStep(3);
-      } else if (step === 3) {
-        const { error } = await authClient.resetPassword({
-          email: getValues('email'),
-          newPassword: values.newPassword || '',
-        });
-        if (error) throw new Error(error);
+      switch (step) {
+        case 1: {
+          const { error } = await authClient.sendOTP({ email: values.email });
+          if (error) throw new Error(error);
+          setStep(2);
+          break;
+        }
 
-        alert('Password reset successful!');
+        case 2: {
+          const { error } = await authClient.verifyOTP({
+            email: getValues('email'),
+            otp: values.otp || '',
+          });
+          if (error) throw new Error(error);
+          setStep(3);
+          break;
+        }
 
-        reset(); 
-        setStep(1);
+        case 3: {
+          const { error } = await authClient.resetPassword({
+            email: getValues('email'),
+            newPassword: values.newPassword || '',
+          });
+          if (error) throw new Error(error);
 
-        router.push('/auth/sign-in');  
+          alert('Password reset successful!');
+          reset();
+          setStep(1);
+          router.push('/auth/sign-in');
+          break;
+        }
+
+        
+          default: {
+           throw new Error('Invalid step');
+          }
+
       }
-    } catch (err: any) {
-      setServerError(err.message || 'Something went wrong');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setServerError(error.message || 'Something went wrong');
+      } else {
+        setServerError('Something went wrong');
+      }
     }
+
     setIsPending(false);
   };
 
@@ -167,7 +185,7 @@ export function ResetPasswordForm(): React.JSX.Element {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-          {/* Email Field  */}
+          {/* Email Field */}
           {step >= 1 && (
             <Controller
               name="email"
@@ -182,7 +200,7 @@ export function ResetPasswordForm(): React.JSX.Element {
             />
           )}
 
-          {/* OTP Field  */}
+          {/* OTP Field */}
           {step === 2 && (
             <Controller
               name="otp"
@@ -197,7 +215,7 @@ export function ResetPasswordForm(): React.JSX.Element {
             />
           )}
 
-          {/* New Password Field*/}
+          {/* New Password Field */}
           {step === 3 && (
             <Controller
               name="newPassword"

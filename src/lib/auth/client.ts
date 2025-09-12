@@ -165,7 +165,7 @@ class AuthClient {
 
  
   async sendOTP({ email }: { email: string }): Promise<{ error?: string }> {
-    const res = await fetch('http://localhost:5000/api/users/send-otp', {
+    const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -177,7 +177,7 @@ class AuthClient {
 
  
   async verifyOTP({ email, otp }: { email: string; otp: string }): Promise<{ error?: string }> {
-    const res = await fetch('http://localhost:5000/api/users/verify-otp', {
+    const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp }),
@@ -195,7 +195,7 @@ class AuthClient {
     email: string;
     newPassword: string;
   }): Promise<{ error?: string }> {
-    const res = await fetch('http://localhost:5000/api/users/reset-password', {
+    const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, newPassword }),

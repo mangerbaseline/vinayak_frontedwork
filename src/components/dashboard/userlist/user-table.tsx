@@ -1,6 +1,3 @@
-
-
-
 'use client';
 
 import React, { JSX, useEffect, useState } from 'react';
@@ -34,6 +31,7 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
+  SelectChangeEvent,
 } from '@mui/material';
 
 interface User {
@@ -118,7 +116,11 @@ function UserTableComponent(): JSX.Element {
 
   // Logged in user & admin check
   const loggedInUser =
-    typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+   
+  // typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  // typeof window === 'object' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  typeof globalThis.window === 'object' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+
   const isAdmin = loggedInUser?.role === 'admin';
   console.log('isadmin', isAdmin);
 
@@ -147,7 +149,7 @@ function UserTableComponent(): JSX.Element {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${editUser._id}`, {
+      const res = await fetch(`http://localhost:5000/api/users/${editUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +197,7 @@ function UserTableComponent(): JSX.Element {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${deleteUser._id}`, {
+      const res = await fetch(`http://localhost:5000/api/users/${deleteUser._id}`, {
         method: 'DELETE',
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
@@ -217,16 +219,19 @@ function UserTableComponent(): JSX.Element {
     }
   };
 
-  // Add new user handlers
-  const handleNewUserChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
-  ) => {
-    const name = e.target.name || '';
-    const value = e.target.value as string;
-    setNewUser({ ...newUser, [name]: value });
-  };
 
-  // *** API CALL ONLY ON THIS FUNCTION TRIGGERED BY "Add" BUTTON INSIDE DIALOG ***
+// For TextField
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const { name, value } = e.target;
+  setNewUser({ ...newUser, [name]: value });
+};
+
+// For Select
+const handleSelectChange = (e: SelectChangeEvent) => {
+  const { name, value } = e.target;
+  setNewUser({ ...newUser, [name]: value });
+};
+ 
   const handleAddUserSave = async () => {
     if (!isAdmin) {
       alert('❌ Access denied: Admins only');
@@ -253,7 +258,7 @@ function UserTableComponent(): JSX.Element {
     console.log('🔐 Sending token:', token);
 
     try {
-      const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/admin/create-user', {
+      const res = await fetch('http://localhost:5000/api/users/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -435,7 +440,7 @@ function UserTableComponent(): JSX.Element {
             label="Name"
             name="name"
             value={newUser.name}
-            onChange={handleNewUserChange}
+            onChange={handleInputChange}
             fullWidth
             margin="normal"
           />
@@ -443,7 +448,7 @@ function UserTableComponent(): JSX.Element {
             label="Email"
             name="email"
             value={newUser.email}
-            onChange={handleNewUserChange}
+            onChange={handleInputChange}
             fullWidth
             margin="normal"
           />
@@ -453,7 +458,7 @@ function UserTableComponent(): JSX.Element {
             name="password"
             type="password"
             value={newUser.password}
-            onChange={handleNewUserChange}
+            onChange={handleInputChange}
             fullWidth
             margin="normal"
           />
@@ -464,7 +469,7 @@ function UserTableComponent(): JSX.Element {
               label="Role"
               name="role"
               value={newUser.role}
-              onChange={handleNewUserChange}
+              onChange={handleSelectChange}
             >
               <MenuItem value="user">User</MenuItem>
               <MenuItem value="admin">admin</MenuItem>
@@ -495,10 +500,24 @@ export function UserTable(): JSX.Element {
 
 
 
+
+
+
+
+
+
+
+
+
+
 // 'use client';
 
 // import React, { JSX, useEffect, useState } from 'react';
-// import { configureStore } from '@reduxjs/toolkit';
+// import {
+//   createSlice,
+//   createAsyncThunk,
+//   configureStore,
+// } from '@reduxjs/toolkit';
 // import { Provider, useDispatch, useSelector } from 'react-redux';
 // import {
 //   Card,
@@ -524,10 +543,61 @@ export function UserTable(): JSX.Element {
 //   MenuItem,
 //   InputLabel,
 //   FormControl,
-//   Box,
 // } from '@mui/material';
-// import { userSlice, fetchUsers, User } from '../../../store/userSlice';
-// import { makeAuthenticatedRequest, handleLogout } from '../../auth/tokenUtils';
+
+// interface User {
+//   _id: string;
+//   name: string;
+//   email: string;
+//   role: string;
+// }
+
+// interface UserState {
+//   users: User[];
+//   loading: boolean;
+//   error: string | null;
+// }
+
+// const initialState: UserState = {
+//   users: [],
+//   loading: false,
+//   error: null,
+// };
+
+// // Fetch users async thunk
+// const fetchUsers = createAsyncThunk('users/fetch', async () => {
+//   const token = localStorage.getItem('token');
+
+//   const res = await fetch('http://localhost:5000/api/users', {
+//     headers: {
+//       Authorization: token ? `Bearer ${token}` : '',
+//     },
+//   });
+//   if (!res.ok) throw new Error('Failed to fetch users');
+//   return res.json();
+// });
+
+// // Slice
+// const userSlice = createSlice({
+//   name: 'users',
+//   initialState,
+//   reducers: {},
+//   extraReducers: (builder) => {
+//     builder
+//       .addCase(fetchUsers.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(fetchUsers.fulfilled, (state, action) => {
+//         state.loading = false;
+//         state.users = action.payload;
+//       })
+//       .addCase(fetchUsers.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = action.error.message || 'Error fetching users';
+//       });
+//   },
+// });
 
 // const store = configureStore({
 //   reducer: {
@@ -542,20 +612,30 @@ export function UserTable(): JSX.Element {
 //   const dispatch = useDispatch<AppDispatch>();
 //   const { users, loading, error } = useSelector((state: RootState) => state.users);
 
+//   // Edit user states
 //   const [editUser, setEditUser] = useState<User | null>(null);
 //   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+//   // Delete user states
 //   const [deleteUser, setDeleteUser] = useState<User | null>(null);
 //   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+//   // Add user states
 //   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+//   // Added password here
 //   const [newUser, setNewUser] = useState({ name: '', email: '', role: '', password: '' });
 
-//   const loggedInUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+//   // Logged in user & admin check
+//   const loggedInUser =
+//     typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
 //   const isAdmin = loggedInUser?.role === 'admin';
+//   console.log('isadmin', isAdmin);
 
 //   useEffect(() => {
 //     dispatch(fetchUsers());
 //   }, [dispatch]);
 
+//   // Edit handlers
 //   const handleEditClick = (user: User) => {
 //     setEditUser(user);
 //     setIsEditDialogOpen(true);
@@ -573,9 +653,15 @@ export function UserTable(): JSX.Element {
 //       return;
 //     }
 
+//     const token = localStorage.getItem('token');
+
 //     try {
-//       const res = await makeAuthenticatedRequest(`http://localhost:5000/api/users/${editUser._id}`, {
+//       const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${editUser._id}`, {
 //         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: token ? `Bearer ${token}` : '',
+//         },
 //         body: JSON.stringify({
 //           name: editUser.name,
 //           email: editUser.email,
@@ -590,12 +676,15 @@ export function UserTable(): JSX.Element {
 //       } else {
 //         const errorData = await res.json();
 //         alert('❌ Failed to update user: ' + (errorData.message || res.statusText));
+//         console.error('🚨 Update error:', errorData);
 //       }
 //     } catch (error) {
 //       alert('❌ Network error while updating user');
+//       console.error('🌐 Network error:', error);
 //     }
 //   };
 
+//   // Delete handlers
 //   const handleDeleteClick = (user: User) => {
 //     if (!isAdmin) {
 //       alert('❌ Access denied: Admins only');
@@ -612,9 +701,14 @@ export function UserTable(): JSX.Element {
 //       return;
 //     }
 
+//     const token = localStorage.getItem('token');
+
 //     try {
-//       const res = await makeAuthenticatedRequest(`http://localhost:5000/api/users/${deleteUser._id}`, {
+//       const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${deleteUser._id}`, {
 //         method: 'DELETE',
+//         headers: {
+//           Authorization: token ? `Bearer ${token}` : '',
+//         },
 //       });
 
 //       if (res.ok) {
@@ -624,12 +718,15 @@ export function UserTable(): JSX.Element {
 //       } else {
 //         const errorData = await res.json();
 //         alert('❌ Failed to delete user: ' + (errorData.message || res.statusText));
+//         console.error('🚨 Delete error:', errorData);
 //       }
 //     } catch (error) {
 //       alert('❌ Network error while deleting user');
+//       console.error('🌐 Network error:', error);
 //     }
 //   };
 
+//   // Add new user handlers
 //   const handleNewUserChange = (
 //     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
 //   ) => {
@@ -638,6 +735,7 @@ export function UserTable(): JSX.Element {
 //     setNewUser({ ...newUser, [name]: value });
 //   };
 
+//   // *** API CALL ONLY ON THIS FUNCTION TRIGGERED BY "Add" BUTTON INSIDE DIALOG ***
 //   const handleAddUserSave = async () => {
 //     if (!isAdmin) {
 //       alert('❌ Access denied: Admins only');
@@ -651,17 +749,28 @@ export function UserTable(): JSX.Element {
 //       return;
 //     }
 
+    
 //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //     if (!emailRegex.test(email)) {
 //       alert('⚠️ Please enter a valid email address');
 //       return;
 //     }
 
+//     const token = localStorage.getItem('token');
+
+//     console.log('📦 New user data:', newUser);
+//     console.log('🔐 Sending token:', token);
+
 //     try {
-//       const res = await makeAuthenticatedRequest('http://localhost:5000/api/users/admin/create-user', {
+//       const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/admin/create-user', {
 //         method: 'POST',
-//         body: JSON.stringify({ name, email, role, password }),
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: token ? `Bearer ${token}` : '',
+//         },
+//         body: JSON.stringify({ name, email, role, password }),  
 //       });
+
 
 //       const data = await res.json();
 
@@ -672,41 +781,34 @@ export function UserTable(): JSX.Element {
 //         dispatch(fetchUsers());
 //       } else {
 //         alert('Failed to add user: ' + (data.message || res.statusText));
+//         console.error('Add user error:', data);
 //       }
 //     } catch (error) {
+//             console.log('Network error:', error);
+
 //       alert('Network error while adding user');
 //     }
 //   };
 
 //   return (
 //     <Card sx={{ width: '100%' }}>
-//       <CardHeader 
-//         title="User List" 
-//         subheader="All registered users"
-//         action={
-//           <Box>
-//             {isAdmin && (
-//               <Button
-//                 variant="contained"
-//                 color="primary"
-//                 sx={{ mb: 2, mr: 2 }}
-//                 onClick={() => setIsAddDialogOpen(true)}
-//               >
-//                 Add New User
-//               </Button>
-//             )}
-//             <Button
-//               variant="outlined"
-//               color="secondary"
-//               onClick={handleLogout}
-//             >
-//               Logout
-//             </Button>
-//           </Box>
-//         }
-//       />
+//       <CardHeader title="User List" subheader="All registered users" />
 //       <Divider />
 //       <CardContent>
+//         {/* 
+//           "Add New User" button: 
+//           Only OPENS the dialog, does NOT call API 
+//         */}
+//         {isAdmin && (
+//           <Button
+//             variant="contained"
+//             color="primary"
+//             sx={{ mb: 2 }}
+//             onClick={() => setIsAddDialogOpen(true)} // open dialog only
+//           >
+//             Add New User
+//           </Button>
+//         )}
 //         {loading ? (
 //           <CircularProgress />
 //         ) : error ? (
@@ -767,7 +869,12 @@ export function UserTable(): JSX.Element {
 //       </CardContent>
 
 //       {/* Edit Dialog */}
-//       <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} maxWidth="sm" fullWidth>
+//       <Dialog
+//         open={isEditDialogOpen}
+//         onClose={() => setIsEditDialogOpen(false)}
+//         maxWidth="sm"
+//         fullWidth
+//       >
 //         <DialogTitle sx={{ color: 'green' }}>Edit User</DialogTitle>
 //         <DialogContent>
 //           <TextField
@@ -808,7 +915,12 @@ export function UserTable(): JSX.Element {
 //       </Dialog>
 
 //       {/* Delete Dialog */}
-//       <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} maxWidth="sm" fullWidth>
+//       <Dialog
+//         open={isDeleteDialogOpen}
+//         onClose={() => setIsDeleteDialogOpen(false)}
+//         maxWidth="sm"
+//         fullWidth
+//       >
 //         <DialogTitle>Delete User</DialogTitle>
 //         <DialogContent>
 //           <TextField label="Name" value={deleteUser?.name || ''} fullWidth margin="normal" disabled />
@@ -844,6 +956,7 @@ export function UserTable(): JSX.Element {
 //             fullWidth
 //             margin="normal"
 //           />
+          
 //           <TextField
 //             label="Password"
 //             name="password"
@@ -863,12 +976,15 @@ export function UserTable(): JSX.Element {
 //               onChange={handleNewUserChange}
 //             >
 //               <MenuItem value="user">User</MenuItem>
-//               <MenuItem value="admin">Admin</MenuItem>
+//               <MenuItem value="admin">admin</MenuItem>
 //             </Select>
 //           </FormControl>
 //         </DialogContent>
 //         <DialogActions>
 //           <Button onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+//           {/* 
+//             "Add" button here CALLS the API via handleAddUserSave
+//           */}
 //           <Button variant="contained" color="primary" onClick={handleAddUserSave}>
 //             Add
 //           </Button>
@@ -885,3 +1001,6 @@ export function UserTable(): JSX.Element {
 //     </Provider>
 //   );
 // }
+
+
+

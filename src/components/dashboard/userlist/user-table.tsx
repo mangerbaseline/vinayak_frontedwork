@@ -147,7 +147,7 @@ function UserTableComponent(): JSX.Element {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${editUser._id}`, {
+      const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${editUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ function UserTableComponent(): JSX.Element {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${deleteUser._id}`, {
+      const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/${deleteUser._id}`, {
         method: 'DELETE',
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
@@ -253,7 +253,7 @@ function UserTableComponent(): JSX.Element {
     console.log('🔐 Sending token:', token);
 
     try {
-      const res = await fetch('http://localhost:5000/api/users/admin/create-user', {
+      const res = await fetch('https://vinayak-devias-backend.onrender.com/api/users/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

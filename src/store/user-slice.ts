@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { makeAuthenticatedRequest } from '../components/auth/tokenUtils';
+import { makeAuthenticatedRequest } from '../components/auth/token-utils';
 
 export interface User {
   _id: string;

@@ -8,6 +8,10 @@ export const paths = {
     integrations: '/dashboard/integrations',
     settings: '/dashboard/settings',
     userlist: '/dashboard/userlist',
+    summery:'/dashboard/summary',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
+
+
+

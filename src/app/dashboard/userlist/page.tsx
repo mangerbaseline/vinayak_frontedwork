@@ -1,3 +1,6 @@
+
+
+
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Stack from '@mui/material/Stack';
@@ -18,8 +21,9 @@ export default function Page(): React.JSX.Element {
         <Typography variant="h4">User List</Typography>
       </div>
       <Grid container spacing={3}>
-          
+        <Grid item xs={12}>
           <UserTable />
+        </Grid>
       </Grid>
     </Stack>
   );

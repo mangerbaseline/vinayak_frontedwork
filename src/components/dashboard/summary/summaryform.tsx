@@ -8,82 +8,174 @@ import {
   TextField,
   Typography,
   Paper,
+  Modal,
 } from '@mui/material';
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 600,
+  height: 400,
+  bgcolor: 'background.paper',
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+  overflowY: 'auto',
+};
 
 const Summaryform = () => {
   const [summary, setSummary] = useState('');
-  const [sentSummaries, setSentSummaries] = useState([]);
+  const [sentSummaries, setSentSummaries] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
-  const [expandedIndex, setExpandedIndex] = useState(null); 
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
+  const API_URL = 'http://localhost:5000/api/users/summaries';
+
+ 
   useEffect(() => {
-    const stored = localStorage.getItem('userSummaries');
-    if (stored) {
-      setSentSummaries(JSON.parse(stored));
-      setSaved(true);
-    }
+    const fetchSummaries = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No auth token found, skipping fetch.');
+        setSentSummaries([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          
+          const summaries = Array.isArray(data)
+            ? data.map((item: any) => (typeof item === 'string' ? item : item.summary))
+            : [];
+          setSentSummaries(summaries);
+          setSaved(true);
+        } else {
+          console.error('Failed to fetch summaries:', res.status);
+          setSentSummaries([]);
+        }
+      } catch (error) {
+        console.error('Error fetching summaries:', error);
+        setSentSummaries([]);
+      }
+    };
+
+    fetchSummaries();
   }, []);
 
-  const handleSend = () => {
-    if (summary.trim() === '') return;
+  const handleSend = async () => {
+    const token = localStorage.getItem('token');
+    if (summary.trim() === '' || !token) return;
 
-    const newSummaries = [...sentSummaries, summary];
-    setSentSummaries(newSummaries);
-    setSummary('');
-    setSaved(false);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ summary }),
+      });
+
+      if (res.ok) {
+        const newSummary = await res.json();
+        const summaryText = newSummary.summary || newSummary;
+        setSentSummaries((prev) => [...prev, summaryText]);
+        setSummary('');
+        setSaved(false);
+      } else {
+        console.error('Failed to send summary');
+      }
+    } catch (err) {
+      console.error('Error sending summary:', err);
+    }
   };
 
   const handleSave = () => {
-    if (sentSummaries.length === 0) return;
-
-    localStorage.setItem('userSummaries', JSON.stringify(sentSummaries));
     setSaved(true);
+    handleSend();
+    setModalOpen(false);
   };
 
-  const handleToggle = (index) => {
-    if (expandedIndex === index) {
-      setExpandedIndex(null); 
-    } else {
-      setExpandedIndex(index); 
-    }
+  const handleToggle = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
   };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <TextField
-        fullWidth
-        multiline
-        minRows={3}
-        placeholder="Type your summary here..."
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-      />
-
-      <Box sx={{ mt: 2, display: 'flex', gap: 2}}>
+      <Box sx={{ display: 'flex', justifyContent: 'start', mb: 2 }}>
         <Button
           variant="contained"
+          onClick={() => setModalOpen(true)}
           sx={{
-            backgroundColor: '#4caf50',
-            '&:hover': { backgroundColor: '#388e3c' },
+            backgroundColor: '#1976d2',
+            '&:hover': { backgroundColor: '#115293' },
+            ml: '-265px',
           }}
-          onClick={handleSend}
-          disabled={summary.trim() === ''}
         >
-          Send
-        </Button>
-
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: saved ? '#f44336' : '#d32f2f',
-            '&:hover': { backgroundColor: saved ? '#d32f2f' : '#b71c1c' },
-          }}
-          onClick={handleSave}
-          disabled={sentSummaries.length === 0}
-        >
-          {saved ? 'Saved' : 'Save'}
+          Add Summary
         </Button>
       </Box>
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        aria-labelledby="modal-summary-title"
+        aria-describedby="modal-summary-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-summary-title" variant="h6" component="h2" mb={2}>
+            Add Your Summary
+          </Typography>
+
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            placeholder="Type your summary here..."
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+          />
+
+          <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button variant="contained" color="secondary" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+
+            {/* <Button
+              variant="contained"
+              sx={{ backgroundColor: '#4caf50', '&:hover': { backgroundColor: '#388e3c' } }}
+              onClick={handleSend}
+              disabled={summary.trim() === ''}
+            >
+              Send
+            </Button> */}
+
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: saved ? '#4caf50' : '#f44336',
+                '&:hover': { backgroundColor: saved ? '#388e3c' : '#d32f2f' },
+              }}
+              onClick={handleSave}
+              disabled={saved}
+            >
+              {saved ? 'Saved' : 'Save'}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
 
       {sentSummaries.length > 0 && (
         <Box sx={{ mt: 4 }}>
@@ -91,7 +183,7 @@ const Summaryform = () => {
             Summaries:
           </Typography>
 
-          {sentSummaries.map((item, index) => (
+          {sentSummaries.map((item: string, index: number) => (
             <Box
               key={index}
               sx={{
@@ -120,26 +212,17 @@ const Summaryform = () => {
                   {index + 1}. {item}
                 </Typography>
 
-                <Button
-                  size="small"
-                  variant="text"
-                  onClick={() => handleToggle(index)}
-                >
+                <Button size="small" variant="text" onClick={() => handleToggle(index)}>
                   {expandedIndex === index ? 'View Less' : 'View More'}
                 </Button>
               </Box>
 
               {expandedIndex === index && (
-                <Paper
-                  elevation={3}
-                  sx={{ mt: 2, p: 2, backgroundColor: '#fff3e0' }}
-                >
+                <Paper elevation={3} sx={{ mt: 2, p: 2, backgroundColor: '#fff3e0' }}>
                   <Typography variant="subtitle1" fontWeight="bold">
                     Detailed View:
                   </Typography>
-                  <Typography sx={{ whiteSpace: 'pre-wrap' }}>
-                    {item}
-                  </Typography>
+                  <Typography sx={{ whiteSpace: 'pre-wrap' }}>{item}</Typography>
                 </Paper>
               )}
             </Box>
@@ -149,6 +232,5 @@ const Summaryform = () => {
     </Container>
   );
 };
-
 
 export default Summaryform;

@@ -46,7 +46,9 @@ const authClient = {
       const data = await res.json();
       console.log('API response:', data);
       const demo=localStorage.setItem('userId',data);
-      console.log("id is ", demo);
+      // console.log("id is ", demo);
+      console.log("id is", demo);
+
       
 
 

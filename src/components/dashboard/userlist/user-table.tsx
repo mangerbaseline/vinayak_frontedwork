@@ -295,7 +295,7 @@ function UserTableComponent(): JSX.Element {
     setUploadDialogOpen(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const _handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 5) {
       alert("You can upload up to 5 images only.");
       return;

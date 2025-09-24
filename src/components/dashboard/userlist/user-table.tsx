@@ -1,562 +1,3 @@
-// 'use client';
-
-// import React, { JSX, useEffect, useState } from 'react';
-// import {
-//   createSlice,
-//   createAsyncThunk,
-//   configureStore,
-// } from '@reduxjs/toolkit';
-// import { Provider, useDispatch, useSelector } from 'react-redux';
-// import {
-//   Card,
-//   CardHeader,
-//   CardContent,
-//   Divider,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Paper,
-//   CircularProgress,
-//   Typography,
-//   Button,
-//   TextField,
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   Select,
-//   MenuItem,
-//   InputLabel,
-//   FormControl,
-//   SelectChangeEvent,
-// } from '@mui/material';
-
-// interface User {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   role: string;
-// }
-
-// interface UserState {
-//   users: User[];
-//   loading: boolean;
-//   error: string | null;
-// }
-
-// const initialState: UserState = {
-//   users: [],
-//   loading: false,
-//   error: null,
-// };
-
-// // Fetch users async thunk
-// const fetchUsers = createAsyncThunk('users/fetch', async () => {
-//   const token = localStorage.getItem('token');
-
-//   const res = await fetch('http://localhost:5000/api/users', {
-//     headers: {
-//       Authorization: token ? `Bearer ${token}` : '',
-//     },
-//   });
-//   if (!res.ok) throw new Error('Failed to fetch users');
-//   return res.json();
-// });
-
-// // Slice
-// const userSlice = createSlice({
-//   name: 'users',
-//   initialState,
-//   reducers: {},
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(fetchUsers.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(fetchUsers.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.users = action.payload;
-//       })
-//       .addCase(fetchUsers.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.error.message || 'Error fetching users';
-//       });
-//   },
-// });
-
-// const store = configureStore({
-//   reducer: {
-//     users: userSlice.reducer,
-//   },
-// });
-
-// type RootState = ReturnType<typeof store.getState>;
-// type AppDispatch = typeof store.dispatch;
-
-// function UserTableComponent(): JSX.Element {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const { users, loading, error } = useSelector((state: RootState) => state.users);
-
-//   // Edit user states
-//   const [editUser, setEditUser] = useState<User | null>(null);
-//   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-//   // Delete user states
-//   const [deleteUser, setDeleteUser] = useState<User | null>(null);
-//   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-//   // Add user states
-//   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-//   const [newUser, setNewUser] = useState({ name: '', email: '', role: '', password: '' });
-
-//   // View user summary states (UPDATED to array)
-//   const [viewUser, setViewUser] = useState<User | null>(null);
-//   const [viewUserSummary, setViewUserSummary] = useState<string[]>([]);
-//   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-//   const [loadingSummary, setLoadingSummary] = useState(false);
-
-//   // Logged in user & admin check
-//   const loggedInUser =
-//     typeof globalThis.window === 'object' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
-
-//   const isAdmin = loggedInUser?.role === 'admin';
-//   console.log('isadmin', isAdmin);
-
-//   useEffect(() => {
-//     dispatch(fetchUsers());
-//   }, [dispatch]);
-
-//   // Edit handlers
-//   const handleEditClick = (user: User) => {
-//     setEditUser(user);
-//     setIsEditDialogOpen(true);
-//   };
-
-//   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (!editUser) return;
-//     setEditUser({ ...editUser, [e.target.name]: e.target.value });
-//   };
-
-//   const handleEditSave = async () => {
-//     if (!editUser) return;
-//     if (!isAdmin) {
-//       alert('❌ Access denied: Admins only');
-//       return;
-//     }
-
-//     const token = localStorage.getItem('token');
-
-//     try {
-//       const res = await fetch(`http://localhost:5000/api/users/${editUser._id}`, {
-//         method: 'PUT',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: token ? `Bearer ${token}` : '',
-//         },
-//         body: JSON.stringify({
-//           name: editUser.name,
-//           email: editUser.email,
-//           role: editUser.role,
-//         }),
-//       });
-
-//       if (res.ok) {
-//         setIsEditDialogOpen(false);
-//         setEditUser(null);
-//         dispatch(fetchUsers());
-//       } else {
-//         const errorData = await res.json();
-//         alert('❌ Failed to update user: ' + (errorData.message || res.statusText));
-//         console.error('🚨 Update error:', errorData);
-//       }
-//     } catch (error) {
-//       alert('❌ Network error while updating user');
-//       console.error('🌐 Network error:', error);
-//     }
-//   };
-
-//   // Delete handlers
-//   const handleDeleteClick = (user: User) => {
-//     if (!isAdmin) {
-//       alert('❌ Access denied: Admins only');
-//       return;
-//     }
-//     setDeleteUser(user);
-//     setIsDeleteDialogOpen(true);
-//   };
-
-//   const handleDeleteConfirm = async () => {
-//     if (!deleteUser) return;
-//     if (!isAdmin) {
-//       alert('❌ Access denied: Admins only');
-//       return;
-//     }
-
-//     const token = localStorage.getItem('token');
-
-//     try {
-//       const res = await fetch(`http://localhost:5000/api/users/${deleteUser._id}`, {
-//         method: 'DELETE',
-//         headers: {
-//           Authorization: token ? `Bearer ${token}` : '',
-//         },
-//       });
-
-//       if (res.ok) {
-//         setIsDeleteDialogOpen(false);
-//         setDeleteUser(null);
-//         dispatch(fetchUsers());
-//       } else {
-//         const errorData = await res.json();
-//         alert('❌ Failed to delete user: ' + (errorData.message || res.statusText));
-//         console.error('🚨 Delete error:', errorData);
-//       }
-//     } catch (error) {
-//       alert('❌ Network error while deleting user');
-//       console.error('🌐 Network error:', error);
-//     }
-//   };
-
-//   // For TextField
-//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-//     const { name, value } = e.target;
-//     setNewUser({ ...newUser, [name]: value });
-//   };
-
-//   // For Select
-//   const handleSelectChange = (e: SelectChangeEvent) => {
-//     const { name, value } = e.target;
-//     setNewUser({ ...newUser, [name]: value });
-//   };
-
-//   const handleAddUserSave = async () => {
-//     if (!isAdmin) {
-//       alert('❌ Access denied: Admins only');
-//       return;
-//     }
-//     const { name, email, role, password } = newUser;
-
-//     if (!name.trim() || !email.trim() || !role.trim() || !password.trim()) {
-//       alert('⚠️ Please fill all fields (Name, Email, Role, Password)');
-//       return;
-//     }
-
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailRegex.test(email)) {
-//       alert('⚠️ Please enter a valid email address');
-//       return;
-//     }
-
-//     const token = localStorage.getItem('token');
-
-//     console.log('📦 New user data:', newUser);
-//     console.log('🔐 Sending token:', token);
-
-//     try {
-//       const res = await fetch('http://localhost:5000/api/users/admin/create-user', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: token ? `Bearer ${token}` : '',
-//         },
-//         body: JSON.stringify({ name, email, role, password }),
-//       });
-
-//       const data = await res.json();
-
-//       if (res.ok) {
-//         alert('User added successfully');
-//         setIsAddDialogOpen(false);
-//         setNewUser({ name: '', email: '', role: '', password: '' });
-//         dispatch(fetchUsers());
-//       } else {
-//         alert('Failed to add user: ' + (data.message || res.statusText));
-//         console.error('Add user error:', data);
-//       }
-//     } catch (error) {
-//       console.log('Network error:', error);
-
-//       alert('Network error while adding user');
-//     }
-//   };
-
-//   // UPDATED: View user summary handler
-//   const handleViewClick = async (user: User) => {
-//     setViewUser(user);
-//     setIsViewDialogOpen(true);
-//     setLoadingSummary(true);
-//     setViewUserSummary([]);
-
-//     const token = localStorage.getItem('token');
-//     try {
-//       const res = await fetch(`http://localhost:5000/api/users/${user._id}/summary`, {
-//         headers: {
-//           Authorization: token ? `Bearer ${token}` : '',
-//         },
-//       });
-
-//       if (res.ok) {
-//         const data = await res.json();
-//         if (Array.isArray(data) && data.length > 0) {
-//           const summaries = data.map((item: any) => item.summary || '');
-//           setViewUserSummary(summaries);
-//         } else {
-//           setViewUserSummary(['No summary available.']);
-//         }
-//       } else {
-//         setViewUserSummary(['Failed to fetch summary.']);
-//       }
-//     } catch (error) {
-//       setViewUserSummary(['Network error while fetching summary.']);
-//     } finally {
-//       setLoadingSummary(false);
-//     }
-//   };
-
-//   return (
-//     <Card sx={{ width: '125%' }}>
-//       <CardHeader title="User List" subheader="All registered users" />
-//       <Divider />
-//       <CardContent>
-//         {isAdmin && (
-//           <Button
-//             variant="contained"
-//             color="primary"
-//             sx={{ mb: 2 }}
-//             onClick={() => setIsAddDialogOpen(true)} // open dialog only
-//           >
-//             Add New User
-//           </Button>
-//         )}
-//         {loading ? (
-//           <CircularProgress />
-//         ) : error ? (
-//           <Typography color="error">{error}</Typography>
-//         ) : (
-//           <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-//             <Table stickyHeader aria-label="users table">
-//               <TableHead>
-//                 <TableRow>
-//                   <TableCell>Name</TableCell>
-//                   <TableCell>Email</TableCell>
-//                   <TableCell>Role</TableCell>
-//                   <TableCell>Summary</TableCell>
-//                   <TableCell>Actions</TableCell>
-//                 </TableRow>
-//               </TableHead>
-//               <TableBody>
-//                 {users.map((user) => (
-//                   <TableRow key={user._id}>
-//                     <TableCell>{user.name}</TableCell>
-//                     <TableCell>{user.email}</TableCell>
-//                     <TableCell>{user.role}</TableCell>
-//                     <TableCell>
-//                       <Button variant="outlined" onClick={() => handleViewClick(user)}>
-//                         View Summary
-//                       </Button>
-//                     </TableCell>
-//                     <TableCell>
-//                       {isAdmin && (
-//                         <>
-//                           <Button
-//                             variant="outlined"
-//                             color="primary"
-//                             onClick={() => handleEditClick(user)}
-//                             sx={{ mr: 1 }}
-//                           >
-//                             Edit
-//                           </Button>
-//                           <Button
-//                             variant="outlined"
-//                             color="error"
-//                             onClick={() => handleDeleteClick(user)}
-//                           >
-//                             Delete
-//                           </Button>
-//                         </>
-//                       )}
-//                     </TableCell>
-//                   </TableRow>
-//                 ))}
-//               </TableBody>
-//             </Table>
-//           </TableContainer>
-//         )}
-
-//         {/* Edit User Dialog */}
-//         <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
-//           <DialogTitle>Edit User</DialogTitle>
-//           <DialogContent>
-//             <TextField
-//               autoFocus
-//               margin="dense"
-//               label="Name"
-//               name="name"
-//               value={editUser?.name || ''}
-//               onChange={handleEditChange}
-//               fullWidth
-//               variant="standard"
-//             />
-//             <TextField
-//               margin="dense"
-//               label="Email"
-//               name="email"
-//               value={editUser?.email || ''}
-//               onChange={handleEditChange}
-//               fullWidth
-//               variant="standard"
-//               type="email"
-//             />
-//             <FormControl fullWidth sx={{ mt: 2 }}>
-//               <InputLabel id="edit-role-label">Role</InputLabel>
-//               <Select
-//                 labelId="edit-role-label"
-//                 label="Role"
-//                 name="role"
-//                 value={editUser?.role || ''}
-//                 onChange={(e) =>
-//                   setEditUser((prev) =>
-//                     prev ? { ...prev, role: e.target.value } : prev
-//                   )
-//                 }
-//               >
-//                 <MenuItem value="admin">Admin</MenuItem>
-//                 <MenuItem value="user">User</MenuItem>
-//               </Select>
-//             </FormControl>
-//           </DialogContent>
-//           <DialogActions>
-//             <Button onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-//             <Button variant="contained" onClick={handleEditSave}>
-//               Save
-//             </Button>
-//           </DialogActions>
-//         </Dialog>
-
-//         {/* Delete Confirmation Dialog */}
-//         <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
-//           <DialogTitle>Confirm Delete</DialogTitle>
-//           <DialogContent>
-//             <Typography>
-//               Are you sure you want to delete user{' '}
-//               <strong>{deleteUser?.name}</strong>?
-//             </Typography>
-//           </DialogContent>
-//           <DialogActions>
-//             <Button onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-//             <Button color="error" variant="contained" onClick={handleDeleteConfirm}>
-//               Delete
-//             </Button>
-//           </DialogActions>
-//         </Dialog>
-
-//         {/* Add New User Dialog */}
-//         <Dialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)}>
-//           <DialogTitle>Add New User</DialogTitle>
-//           <DialogContent>
-//             <TextField
-//               autoFocus
-//               margin="dense"
-//               label="Name"
-//               name="name"
-//               value={newUser.name}
-//               onChange={handleInputChange}
-//               fullWidth
-//               variant="standard"
-//             />
-//             <TextField
-//               margin="dense"
-//               label="Email"
-//               name="email"
-//               value={newUser.email}
-//               onChange={handleInputChange}
-//               fullWidth
-//               variant="standard"
-//               type="email"
-//             />
-//             <FormControl fullWidth sx={{ mt: 2 }}>
-//               <InputLabel id="add-role-label">Role</InputLabel>
-//               <Select
-//                 labelId="add-role-label"
-//                 label="Role"
-//                 name="role"
-//                 value={newUser.role}
-//                 onChange={handleSelectChange}
-//               >
-//                 <MenuItem value="admin">Admin</MenuItem>
-//                 <MenuItem value="user">User</MenuItem>
-//               </Select>
-//             </FormControl>
-//             <TextField
-//               margin="dense"
-//               label="Password"
-//               name="password"
-//               value={newUser.password}
-//               onChange={handleInputChange}
-//               fullWidth
-//               variant="standard"
-//               type="password"
-//             />
-//           </DialogContent>
-//           <DialogActions>
-//             <Button onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-//             <Button variant="contained" onClick={handleAddUserSave}>
-//               Add
-//             </Button>
-//           </DialogActions>
-//         </Dialog>
-
-//         {/* View Summary Dialog (UPDATED) */}
-//         <Dialog
-//           open={isViewDialogOpen}
-//           onClose={() => setIsViewDialogOpen(false)}
-//           maxWidth="sm"
-//           fullWidth
-//         >
-//           <DialogTitle>
-//             Summary for <strong>{viewUser?.name}</strong>
-//           </DialogTitle>
-//           <DialogContent
-//             sx={{ minHeight: 120, maxHeight: 300, overflowY: 'auto' }}
-//           >
-//             {loadingSummary ? (
-//               <CircularProgress />
-//             ) : (
-//               viewUserSummary.map((summary, index) => (
-//                 <Typography
-//                   key={index}
-//                   sx={{ whiteSpace: 'pre-wrap', mb: 2 }}
-//                 >
-//                   {index + 1}. {summary}
-//                 </Typography>
-//               ))
-//             )}
-//           </DialogContent>
-//           <DialogActions>
-//             <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
-//           </DialogActions>
-//         </Dialog>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// export default function UserTable(): JSX.Element {
-//   return (
-//     <Provider store={store}>
-//       <UserTableComponent />
-//     </Provider>
-//   );
-// }
-
-
-
-
-
 'use client';
 
 import React, { JSX, useEffect, useState } from 'react';
@@ -572,7 +13,7 @@ import {
   CardContent,
   Divider,
   Table,
-  TableBody,
+  TableBody,  
   TableCell,
   TableContainer,
   TableHead,
@@ -592,6 +33,7 @@ import {
   FormControl,
   SelectChangeEvent,
 } from '@mui/material';
+import { Box } from '@mui/system';
 
 interface User {
   _id: string;
@@ -611,7 +53,6 @@ const initialState: UserState = {
   loading: false,
   error: null,
 };
-
 
 const fetchUsers = createAsyncThunk('users/fetch', async () => {
   const token = localStorage.getItem('token');
@@ -672,15 +113,21 @@ function UserTableComponent(): JSX.Element {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [loadingSummary, setLoadingSummary] = useState(false);
 
- 
+
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  // const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+
+  const [uploadingUser, setUploadingUser] = useState<User | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   const loggedInUser =
-    typeof window !== 'undefined' && localStorage.getItem('user')
+    globalThis.window !== undefined && localStorage.getItem('user')
       ? JSON.parse(localStorage.getItem('user')!)
       : null;
 
   const isAdmin = loggedInUser?.role === 'admin';
   const isNormalUser = !isAdmin;
-
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -762,7 +209,6 @@ function UserTableComponent(): JSX.Element {
     }
   };
 
- 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
@@ -811,7 +257,6 @@ function UserTableComponent(): JSX.Element {
     }
   };
 
- 
   const handleViewClick = async (user: User) => {
     setViewUser(user);
     setIsViewDialogOpen(true);
@@ -829,7 +274,7 @@ function UserTableComponent(): JSX.Element {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          const summaries = data.map((item: any) => item.summary || '');
+          const summaries = data.map((item: { summary?: string }) => item.summary || '');
           setViewUserSummary(summaries);
         } else {
           setViewUserSummary(['No summary available']);
@@ -845,43 +290,82 @@ function UserTableComponent(): JSX.Element {
   };
 
 
- 
   const handleUploadClick = (user: User) => {
-    alert(`Upload clicked for user: ${user.name}`);
-    
+    setUploadingUser(user);
+    setUploadDialogOpen(true);
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 5) {
+      alert("You can upload up to 5 images only.");
+      return;
+    }
+    setUploadFiles(e.target.files);
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!uploadFiles || !uploadingUser) {
+      alert("Please select images.");
+      return;
+    }
+
+    const formData = new FormData();
+    
+   uploadFiles.forEach((file) => {
+  formData.append('images', file);
+});
+
+    
+    setUploading(true);
+
+    try {
+      const res = await fetch('http://localhost:5000/api/users/upload-multiple-images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert('Images uploaded successfully!');
+        setUploadDialogOpen(false);
+        setUploadFiles(null);
+      } else {
+        alert('Upload failed: ' + (data.message || 'Server error'));
+      }
+    } catch (err) {
+      alert('Network error while uploading images');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <Card sx={{ width: '125%' }}>
-      <CardHeader title="User List" subheader="All registered users" />
+    <Box sx={{width:'135%'}} >
+    <Card  >
+      <CardHeader
+        title="Users"
+        action={
+          isAdmin ? (
+            <Button onClick={() => setIsAddDialogOpen(true)}>Add User</Button>
+          ) : null
+        }
+      />
       <Divider />
       <CardContent>
-        {isAdmin && (
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mb: 2 }}
-            onClick={() => setIsAddDialogOpen(true)}
-          >
-            Add New User
-          </Button>
-        )}
-
         {loading ? (
           <CircularProgress />
         ) : error ? (
           <Typography color="error">{error}</Typography>
         ) : (
-          <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-            <Table stickyHeader aria-label="users table">
+          <TableContainer component={Paper}>
+            <Table aria-label="users table">
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Role</TableCell>
-                   {isNormalUser && <TableCell>Upload</TableCell>}
-                  
-                  {isAdmin && <TableCell>Summary</TableCell>}
-                  {isAdmin && <TableCell>Actions</TableCell>}
+                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -890,202 +374,265 @@ function UserTableComponent(): JSX.Element {
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      {isAdmin && (
+                        <>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => handleEditClick(user)}
+                            style={{ marginRight: 8 }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            onClick={() => handleDeleteClick(user)}
+                            style={{ marginRight: 8 }}
+                          >
+                            Delete
+                          </Button>
 
-                    {isNormalUser && (
-                      <TableCell>
-                        <Button variant="outlined" onClick={() => handleUploadClick(user)}>
+                          <Button
+                             variant="outlined"
+                             size="small"
+                             onClick={() => handleViewClick(user)}
+                             style={{ marginRight: 8 }}
+                               >
+                             View Summary
+                             </Button>
+                        </>
+
+                      )}
+                      {isNormalUser && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleUploadClick(user)}
+                        >
                           Upload
                         </Button>
-                      </TableCell>
-                    )}
-
-                    {isAdmin && (
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          onClick={() => handleViewClick(user)}
-                        >
-                          View Summary
-                        </Button>
-                      </TableCell>
-                    )}
-
-                    {isAdmin && (
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          onClick={() => handleEditClick(user)}
-                          sx={{ mr: 1 }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleDeleteClick(user)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                    )}
+                      )}
+                      
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
         )}
+      </CardContent>
 
-        <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Name"
-              name="name"
-              value={editUser?.name || ''}
-              onChange={handleEditChange}
-              fullWidth
-              variant="standard"
-            />
-            <TextField
-              margin="dense"
-              label="Email"
-              name="email"
-              value={editUser?.email || ''}
-              onChange={handleEditChange}
-              fullWidth
-              variant="standard"
-            />
-            <FormControl fullWidth margin="dense" variant="standard">
-              <InputLabel id="role-select-label">Role</InputLabel>
-              <Select
-                labelId="role-select-label"
-                name="role"
-                value={editUser?.role || ''}
-                onChange={(e) =>
-                  setEditUser((prev) =>
-                    prev ? { ...prev, role: e.target.value } : null
-                  )
-                }
-                label="Role"
-              >
-                <MenuItem value="admin">admin</MenuItem>
-                <MenuItem value="user">user</MenuItem>
-              </Select>
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleEditSave} variant="contained" color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Name"
+            name="name"
+            fullWidth
+            value={editUser?.name || ''}
+            onChange={handleEditChange}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            fullWidth
+            value={editUser?.email || ''}
+            onChange={handleEditChange}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="role-select-label">Role</InputLabel>
+            <Select
+              labelId="role-select-label"
+              label="Role"
+              name="role"
+              value={editUser?.role || ''}
+              onChange={(e) => {
+                if (!editUser) return;
+                setEditUser({ ...editUser, role: e.target.value });
+              }}
+            >
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="normal">User</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleEditSave} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete user{' '}
+          <strong>{deleteUser?.name}</strong>?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)}>
+        <DialogTitle>Add New User</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Name"
+            name="name"
+            fullWidth
+            value={newUser.name}
+            onChange={handleInputChange}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            fullWidth
+            value={newUser.email}
+            onChange={handleInputChange}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="add-role-select-label">Role</InputLabel>
+            <Select
+              labelId="add-role-select-label"
+              label="Role"
+              name="role"
+              value={newUser.role}
+              onChange={handleSelectChange}
+            >
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="normal">Normal</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="dense"
+            label="Password"
+            name="password"
+            type="password"
+            fullWidth
+            value={newUser.password}
+            onChange={handleInputChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleAddUserSave} variant="contained">
+            Add User
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View User Summary Dialog */}
+      <Dialog open={isViewDialogOpen} onClose={() => setIsViewDialogOpen(false)}>
+        <DialogTitle>Summary for {viewUser?.name}</DialogTitle>
+        <DialogContent>
+          {loadingSummary ? (
+            <CircularProgress />
+          ) : (
+            viewUserSummary.map((summary, idx) => (
+              <Typography key={idx} paragraph>
+                {summary}
+              </Typography>
+            ))
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+     
+
+      <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)}>
+  <DialogTitle>Upload Images for {uploadingUser?.name}</DialogTitle>
+  <DialogContent>
+    <Typography variant="body2" color="textSecondary" style={{ marginBottom: 8 }}>
+      You can upload only 5 images.
+    </Typography>
+
+    {[...Array(5)].map((_, index) => (
+      <input
+        key={index}
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
 
         
-        <Dialog
-          open={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-        >
-          <DialogTitle>Delete User</DialogTitle>
-          <DialogContent>
-            Are you sure you want to delete{' '}
-            <strong>{deleteUser?.name}</strong>?
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button
-              onClick={handleDeleteConfirm}
-              variant="contained"
-              color="error"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+          const newFiles = [...(uploadFiles || [])];
+          newFiles[index] = file;
+          setUploadFiles(newFiles);
 
-        <Dialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)}>
-          <DialogTitle>Add New User</DialogTitle>
-          <DialogContent>
-            <TextField
-              margin="dense"
-              label="Name"
-              name="name"
-              value={newUser.name}
-              onChange={handleInputChange}
-              fullWidth
-              variant="standard"
-            />
-            <TextField
-              margin="dense"
-              label="Email"
-              name="email"
-              value={newUser.email}
-              onChange={handleInputChange}
-              fullWidth
-              variant="standard"
-            />
-            <FormControl fullWidth margin="dense" variant="standard">
-              <InputLabel id="add-role-select-label">Role</InputLabel>
-              <Select
-                labelId="add-role-select-label"
-                name="role"
-                value={newUser.role}
-                onChange={handleSelectChange}
-                label="Role"
-              >
-                <MenuItem value="admin">admin</MenuItem>
-                <MenuItem value="user">user</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              margin="dense"
-              label="Password"
-              name="password"
-              type="password"
-              value={newUser.password}
-              onChange={handleInputChange}
-              fullWidth
-              variant="standard"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddUserSave} variant="contained" color="primary">
-              Add User
-            </Button>
-          </DialogActions>
-        </Dialog>
+          
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const imgElement = document.getElementById(`preview-${index}`) as HTMLImageElement;
+            if (imgElement && event.target?.result) {
+              imgElement.src = event.target.result as string;
+            }
+          };
+          reader.readAsDataURL(file);
+        }}
+        style={{ display: 'block', marginTop: 10 }}
+      />
+    ))}
 
-       
-        <Dialog open={isViewDialogOpen} onClose={() => setIsViewDialogOpen(false)}>
-          <DialogTitle>User Summary - {viewUser?.name}</DialogTitle>
-          <DialogContent dividers>
-            {loadingSummary ? (
-              <CircularProgress />
-            ) : (
-              viewUserSummary.map((summary, idx) => (
-                <Typography key={idx} paragraph>
-                  {summary}
-                </Typography>
-              ))
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-      </CardContent>
+    {/* Image previews */}
+    <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+      {[...Array(5)].map((_, index) => (
+        <img
+          key={index}
+          id={`preview-${index}`}
+          src=""
+          alt={`preview-${index}`}
+          style={{
+            width: 100,
+            height: 100,
+            objectFit: 'cover',
+            border: '1px solid #ccc',
+            display: uploadFiles && uploadFiles[index] ? 'block' : 'none',
+          }}
+        />
+      ))}
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setUploadDialogOpen(false)}>Cancel</Button>
+    <Button
+      variant="contained"
+      onClick={handleUploadSubmit}
+      disabled={uploading}
+    >
+      {uploading ? 'Uploading...' : 'save'}
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </Card>
+    </Box>
   );
 }
 
-export default function UserTableWrapper(): JSX.Element {
+export default function UsersPage(): JSX.Element {
   return (
     <Provider store={store}>
       <UserTableComponent />
     </Provider>
   );
 }
+

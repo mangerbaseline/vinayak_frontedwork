@@ -10,6 +10,8 @@ export const navItems = [
   { key: 'error', title: 'Error', href: paths.errors.notFound, icon: 'x-square'},
   { key: 'userlist', title: 'UserList', href: paths.dashboard.userlist, icon: 'user' },
   { key: 'summary', title: 'Summary', href: paths.dashboard.summery, icon: 'chart-bar' },
+ {key:'all-user', title:'All-user',href:paths.dashboard.alluser,icon:'users'},
+ { key: 'request', title: 'Request', href: paths.dashboard.request, icon: 'request' }
 
 
 ] satisfies NavItemConfig[];

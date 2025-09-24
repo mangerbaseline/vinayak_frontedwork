@@ -11,8 +11,11 @@ import {
   Modal,
 } from '@mui/material';
 
+// ✅ Add a proper type for items returned by the API
+type SummaryItem = string | { summary: string };
+
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -34,7 +37,6 @@ const Summaryform = () => {
 
   const API_URL = 'http://localhost:5000/api/users/summaries';
 
- 
   useEffect(() => {
     const fetchSummaries = async () => {
       const token = localStorage.getItem('token');
@@ -55,10 +57,14 @@ const Summaryform = () => {
 
         if (res.ok) {
           const data = await res.json();
+
           
           const summaries = Array.isArray(data)
-            ? data.map((item: any) => (typeof item === 'string' ? item : item.summary))
+            ? data.map((item: SummaryItem) =>
+                typeof item === 'string' ? item : item.summary
+              )
             : [];
+
           setSentSummaries(summaries);
           setSaved(true);
         } else {
@@ -97,8 +103,8 @@ const Summaryform = () => {
       } else {
         console.error('Failed to send summary');
       }
-    } catch (err) {
-      console.error('Error sending summary:', err);
+    } catch (error) {
+      console.error('Error sending summary:', error);
     }
   };
 
@@ -152,15 +158,6 @@ const Summaryform = () => {
             <Button variant="contained" color="secondary" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-
-            {/* <Button
-              variant="contained"
-              sx={{ backgroundColor: '#4caf50', '&:hover': { backgroundColor: '#388e3c' } }}
-              onClick={handleSend}
-              disabled={summary.trim() === ''}
-            >
-              Send
-            </Button> */}
 
             <Button
               variant="contained"

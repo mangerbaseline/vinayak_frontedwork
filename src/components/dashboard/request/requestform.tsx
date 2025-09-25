@@ -296,25 +296,39 @@ export default function RequestView() {
 
   return (
     <Stack spacing={2} sx={{ maxWidth: 600, margin: '20px auto' }}>
-      <Typography variant="h6">Pending Requests</Typography>
+      {/* <Typography variant="h6">Pending Requests</Typography> */}
 
       {requests.length === 0 && <Typography>No pending requests found.</Typography>}
 
       {requests.map((req) => (
+        // <Stack
+        //   // key={req._id}
+        //   // direction="row"
+        //   // justifyContent="space-between"
+        //   // alignItems="center"
+        //   // sx={{ border: '1px solid #ccc', padding: 1, borderRadius: 1 }}
+        // >
+        //   {/* <Typography>
+        //     {req.senderId.name} ({req.senderId.email})
+        //   </Typography> */}
+        //   <Button variant="outlined" onClick={() => handleView(req)}>
+        //     View Request
+        //   </Button>
+        // </Stack>
+
         <Stack
-          // key={req._id}
-          // direction="row"
-          // justifyContent="space-between"
-          // alignItems="center"
-          // sx={{ border: '1px solid #ccc', padding: 1, borderRadius: 1 }}
-        >
-          {/* <Typography>
-            {req.senderId.name} ({req.senderId.email})
-          </Typography> */}
-          <Button variant="outlined" onClick={() => handleView(req)}>
-            View Request
-          </Button>
-        </Stack>
+  key={req._id}  
+  direction="row"
+  justifyContent="flex-start"  
+  marginLeft="-40%"
+  alignItems="center"
+  sx={{ padding: 1 }}
+>
+  <Button variant="outlined" onClick={() => handleView(req)}>
+    View Request
+  </Button>
+</Stack>
+
       ))}
 
       <Dialog open={open} onClose={handleClose}>

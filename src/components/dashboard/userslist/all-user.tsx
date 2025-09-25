@@ -211,13 +211,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { UserPlus } from 'lucide-react';
 import { Modal, Button } from '@mui/material';
-import { error } from 'console';
+// import { error } from 'console';
+
 
 interface User {
   _id: string;
@@ -269,11 +271,13 @@ const AllUser: React.FC = () => {
   //     ? globalThis.window.localStorage.getItem('user')
   //     : null;
 
-  const hasWindow = globalThis.window !== undefined;
 
-const token = hasWindow ? window.localStorage.getItem('token') : null;
-const sender = hasWindow ? window.localStorage.getItem('user') : null;
-const userDetailsString = hasWindow ? window.localStorage.getItem('user') : null;
+
+const hasWindow = globalThis.window !== undefined;
+const token = hasWindow ? globalThis.window.localStorage.getItem('token') : null;
+const sender = hasWindow ? globalThis.window.localStorage.getItem('user') : null;
+const userDetailsString = hasWindow ? globalThis.window.localStorage.getItem('user') : null;
+
 
   const userDetails = userDetailsString ? JSON.parse(userDetailsString) : null;
   const userId = userDetails?.id ?? null;
@@ -307,18 +311,24 @@ const userDetailsString = hasWindow ? window.localStorage.getItem('user') : null
       );
       alert('Request sent successfully!');
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        alert(error.response?.data?.message || 'Failed to send request');
-      } else {
-        alert('Unexpected error sending request');
-      }
+      // if (axios.isAxiosError(error)) {
+      //   alert(error.response?.data?.message || 'Failed to send request');
+      // } else {
+      //   alert('Unexpected error sending request');
+      // }
+       if (isAxiosError(error)) {
+         alert(error.response?.data?.message || 'Failed to send request');
+        } else {
+          alert('Unexpected error sending request');
+        }
     }
   };
 
   const handleOpen = () => setOpenModal(true);
   const handleClose = () => setOpenModal(false);
 
-  const fetchReceivedRequests = async () => {
+
+    const _fetchReceivedRequests = async () => {
     if (!token || !userId) {
       alert('You must be logged in!');
       return;

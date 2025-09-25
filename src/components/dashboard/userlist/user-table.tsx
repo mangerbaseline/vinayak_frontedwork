@@ -304,10 +304,13 @@ function UserTableComponent(): JSX.Element {
   //   }
   //   setUploadFiles(e.target.files);
   // };
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const _handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const files = e.target.files;
   if (files) {
-    setUploadFiles(Array.from(files));
+    // setUploadFiles(Array.from(files));
+    setUploadFiles([...files]);
+
   }
 };
 
@@ -343,7 +346,7 @@ function UserTableComponent(): JSX.Element {
       } else {
         alert('Upload failed: ' + (data.message || 'Server error'));
       }
-    } catch (err) {
+    } catch{
       alert('Network error while uploading images');
     } finally {
       setUploading(false);
@@ -351,7 +354,7 @@ function UserTableComponent(): JSX.Element {
   };
 
   return (
-    <Box sx={{width:'135%'}} >
+    <Box sx={{width:'95%'}} >
     <Card  >
       <CardHeader
         title="Users"
@@ -576,7 +579,8 @@ function UserTableComponent(): JSX.Element {
       You can upload only 5 images.
     </Typography>
 
-    {[...Array(5)].map((_, index) => (
+    {/* {[...Array(5)].map((_, index) => ( */}
+      {Array.from({ length: 5 }).map((_, index) => (
       <input
         key={index}
         type="file"
@@ -592,12 +596,14 @@ function UserTableComponent(): JSX.Element {
 
           
           const reader = new FileReader();
-          reader.onload = function (event) {
-            const imgElement = document.getElementById(`preview-${index}`) as HTMLImageElement;
+          
+          reader.addEventListener('load', function(event){
+            const imgElement = document.querySelector(`#preview-${index}`) as HTMLImageElement;
+
             if (imgElement && event.target?.result) {
               imgElement.src = event.target.result as string;
             }
-          };
+          });
           reader.readAsDataURL(file);
         }}
         style={{ display: 'block', marginTop: 10 }}
@@ -606,12 +612,13 @@ function UserTableComponent(): JSX.Element {
 
     {/* Image previews */}
     <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
-      {[...Array(5)].map((_, index) => (
-        <img
+    
+        {Array.from({ length: 5 }).map((_, index) => (
+        <image
           key={index}
           id={`preview-${index}`}
-          src=""
-          alt={`preview-${index}`}
+          // src=""
+          // alt={`preview-${index}`}
           style={{
             width: 100,
             height: 100,
@@ -623,7 +630,7 @@ function UserTableComponent(): JSX.Element {
       ))}
     </div>
   </DialogContent>
-  <DialogActions>
+   <DialogActions>
     <Button onClick={() => setUploadDialogOpen(false)}>Cancel</Button>
     <Button
       variant="contained"
@@ -632,8 +639,8 @@ function UserTableComponent(): JSX.Element {
     >
       {uploading ? 'Uploading...' : 'save'}
     </Button>
-  </DialogActions>
-</Dialog>
+   </DialogActions>
+ </Dialog>
 
     </Card>
     </Box>

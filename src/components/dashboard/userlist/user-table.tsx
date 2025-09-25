@@ -614,11 +614,11 @@ function UserTableComponent(): JSX.Element {
     <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
     
         {Array.from({ length: 5 }).map((_, index) => (
-        <image
+        <img
           key={index}
           id={`preview-${index}`}
-          // src=""
-          // alt={`preview-${index}`}
+          src=""
+          alt={`preview-${index}`}
           style={{
             width: 100,
             height: 100,

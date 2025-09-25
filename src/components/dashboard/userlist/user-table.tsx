@@ -116,7 +116,9 @@ function UserTableComponent(): JSX.Element {
 
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   // const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
-  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  // const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploadFiles, setUploadFiles] = useState<File[] | null>(null);
+
 
   const [uploadingUser, setUploadingUser] = useState<User | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -295,13 +297,20 @@ function UserTableComponent(): JSX.Element {
     setUploadDialogOpen(true);
   };
 
-  const _handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 5) {
-      alert("You can upload up to 5 images only.");
-      return;
-    }
-    setUploadFiles(e.target.files);
-  };
+  // const _handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files.length > 5) {
+  //     alert("You can upload up to 5 images only.");
+  //     return;
+  //   }
+  //   setUploadFiles(e.target.files);
+  // };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (files) {
+    setUploadFiles(Array.from(files));
+  }
+};
+
 
   const handleUploadSubmit = async () => {
     if (!uploadFiles || !uploadingUser) {
@@ -311,9 +320,10 @@ function UserTableComponent(): JSX.Element {
 
     const formData = new FormData();
     
-   uploadFiles.forEach((file) => {
+  //  uploadFiles.forEach((file) => {
+  for (const file of uploadFiles) {
   formData.append('images', file);
-});
+};
 
     
     setUploading(true);
@@ -458,7 +468,8 @@ function UserTableComponent(): JSX.Element {
               }}
             >
               <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="normal">User</MenuItem>
+              <MenuItem value="user">User</MenuItem>
+               
             </Select>
           </FormControl>
         </DialogContent>
@@ -515,7 +526,8 @@ function UserTableComponent(): JSX.Element {
               onChange={handleSelectChange}
             >
               <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="normal">Normal</MenuItem>
+              {/* <MenuItem value="normal">Normal</MenuItem> */}
+               <MenuItem value="user">User</MenuItem>
             </Select>
           </FormControl>
           <TextField
@@ -635,4 +647,6 @@ export default function UsersPage(): JSX.Element {
     </Provider>
   );
 }
+
+
 

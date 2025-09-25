@@ -6,6 +6,7 @@
 // import Typography from '@mui/material/Typography';
 // import Box from '@mui/material/Box';
 // import { UserPlus } from 'lucide-react';
+// import { Modal, Button } from '@mui/material';
 
 // interface User {
 //   _id: string;
@@ -14,37 +15,51 @@
 //   role: string;
 // }
 
+// const modalStyle = {
+//   position: 'absolute' as 'absolute',
+//   top: '50%',
+//   left: '50%',
+//   transform: 'translate(-50%, -50%)',
+//   width: 400,
+//   bgcolor: 'background.paper',
+//   borderRadius: 2,
+//   boxShadow: 24,
+//   p: 4,
+//   maxHeight: '80vh',
+//   overflowY: 'auto',
+// };
+
 // const AllUser: React.FC = () => {
 //   const [users, setUsers] = useState<User[]>([]);
-//   const [userRequests, setUserRequests] = useState<any[]>([]);
+//   const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
+//   const [openModal, setOpenModal] = useState(false);
 
 //   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-//   const senderId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-//   const sender = localStorage.getItem('user');
+//   const sender = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+
+//   const userDetailsString = localStorage.getItem('user')
+//   const userDetails = JSON.parse(userDetailsString);
+//   const userId = userDetails.id;
+//   console.log(userId, "userID");
 
 //   useEffect(() => {
 //     axios
 //       .get('http://localhost:5000/api/users')
 //       .then((response) => {
 //         setUsers(response.data);
-//         console.log('users are', response.data);
 //       })
 //       .catch((error) => {
 //         console.error('Error fetching users:', error);
 //       });
 //   }, []);
 
-//   const sendRequest = async (senderId: string, receiverId: string) => {
-//     console.log("sender id :", receiverId);
-//     console.log("sender: ", senderId);
-
+//   const sendRequest = async (senderId: string | null, receiverId: string) => {
 //     if (!senderId) {
 //       alert('You must be logged in to send a request.');
 //       return;
 //     }
 
 //     try {
-//       console.log("hitting entry point");
 //       const res = await axios.post(
 //         'http://localhost:5000/api/users/send-request',
 //         { toUserId: receiverId },
@@ -55,28 +70,41 @@
 //         }
 //       );
 //       alert('Request sent successfully!');
-//       console.log('Send Request Response:', res.data);
 //     } catch (error: any) {
-//       console.error('Error sending request:', error.response?.data || error.message);
 //       alert(error.response?.data?.message || 'Failed to send request');
 //     }
 //   };
 
-  
+//   const handleOpen = () => setOpenModal(true);
+//   const handleClose = () => setOpenModal(false);
+
 //   const fetchReceivedRequests = async () => {
+//      if (!token || !userId) {
+//     alert('You must be logged in!');
+//     return;
+//   }
+//    console.log('Token in frontend:', token);
+//    console.log('Current User ID (frontend):', userId);
+
 //     try {
 //       const res = await axios.get('http://localhost:5000/api/users/received-requests', {
 //         headers: {
 //           Authorization: `Bearer ${token}`,
 //         },
 //       });
+//       console.log(res, "received-requests");
+      
+// console.log('Response status:', res.status);
+//   console.log('Response data:', res.data);
 
-//       console.log('Received Requests:', res.data.requests);
+//       setReceivedRequests(res.data.requests);
+//       handleOpen();
 
-//       const names = res.data.requests.map((req: any) => req.senderId.name).join(', ');
-//       alert(`You have received requests from: ${names || 'No one'}`);
+      
+//       const idsArray = res.data.requests.map((req: any) => [req.senderId._id, req.receiverId]);
+//       console.log('Array of [senderId, receiverId]:', idsArray);
+
 //     } catch (error: any) {
-//       console.error('Error fetching received requests:', error.response?.data || error.message);
 //       alert('Failed to fetch received requests');
 //     }
 //   };
@@ -97,23 +125,15 @@
 //         User List
 //       </Typography>
 
-//       <button
+//       {/* <Button
+//         variant="contained"
+//         color="success"
 //         onClick={fetchReceivedRequests}
-//         style={{
-//           padding: '8px 16px',
-//           backgroundColor: '#388e3c',
-//           color: '#fff',
-//           border: 'none',
-//           borderRadius: '4px',
-//           cursor: 'pointer',
-//           width: 'fit-content',
-//           marginBottom: '20px',
-//         }}
+//         sx={{ width: 'fit-content', mb: 2 }}
 //       >
 //         View Requests
-//       </button>
+//       </Button> */}
 
-      
 //       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
 //         {users.map((user, index) => (
 //           <Paper
@@ -145,13 +165,47 @@
 //           </Paper>
 //         ))}
 //       </Box>
+
+//       <Modal
+//         open={openModal}
+//         onClose={handleClose}
+//         aria-labelledby="modal-title"
+//         aria-describedby="modal-description"
+//       >
+//         <Box sx={modalStyle}>
+//           <Typography id="modal-title" variant="h6" component="h2" gutterBottom>
+//             Received Requests
+//           </Typography>
+
+//           {receivedRequests.length === 0 ? (
+//             <Typography>No requests received.</Typography>
+//           ) : (
+//             receivedRequests.map((req, index) => (
+//               <Paper
+//                 key={index}
+//                 elevation={2}
+//                 sx={{ p: 2, mb: 1 }}
+//               >
+//                 <Typography>
+//                   <strong>Name:</strong> {req.senderId?.name}
+//                 </Typography>
+//                 <Typography>
+//                   <strong>Email:</strong> {req.senderId?.email}
+//                 </Typography>
+//               </Paper>
+//             ))
+//           )}
+
+//           <Button onClick={handleClose} variant="outlined" sx={{ mt: 2 }}>
+//             Close
+//           </Button>
+//         </Box>
+//       </Modal>
 //     </Box>
 //   );
 // };
 
 // export default AllUser;
-
-
 
 
 'use client';
@@ -163,6 +217,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { UserPlus } from 'lucide-react';
 import { Modal, Button } from '@mui/material';
+import { error } from 'console';
 
 interface User {
   _id: string;
@@ -171,8 +226,17 @@ interface User {
   role: string;
 }
 
+interface Request {
+  senderId: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  receiverId: string;
+}
+
 const modalStyle = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -187,20 +251,36 @@ const modalStyle = {
 
 const AllUser: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
+  const [receivedRequests, setReceivedRequests] = useState<Request[]>([]);
   const [openModal, setOpenModal] = useState(false);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const sender = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+  // const token =
+  //   typeof globalThis.window !== 'undefined'
+  //     ? globalThis.window.localStorage.getItem('token')
+  //     : null;
 
-  const userDetailsString = localStorage.getItem('user')
-  const userDetails = JSON.parse(userDetailsString);
-  const userId = userDetails.id;
-  console.log(userId, "userID");
+  // const sender =
+  //   typeof globalThis.window !== 'undefined'
+  //     ? globalThis.window.localStorage.getItem('user')
+  //     : null;
+
+  // const userDetailsString =
+  //   typeof globalThis.window !== 'undefined'
+  //     ? globalThis.window.localStorage.getItem('user')
+  //     : null;
+
+  const hasWindow = globalThis.window !== undefined;
+
+const token = hasWindow ? window.localStorage.getItem('token') : null;
+const sender = hasWindow ? window.localStorage.getItem('user') : null;
+const userDetailsString = hasWindow ? window.localStorage.getItem('user') : null;
+
+  const userDetails = userDetailsString ? JSON.parse(userDetailsString) : null;
+  const userId = userDetails?.id ?? null;
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/users')
+      .get<User[]>('http://localhost:5000/api/users')
       .then((response) => {
         setUsers(response.data);
       })
@@ -216,7 +296,7 @@ const AllUser: React.FC = () => {
     }
 
     try {
-      const res = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/users/send-request',
         { toUserId: receiverId },
         {
@@ -226,8 +306,12 @@ const AllUser: React.FC = () => {
         }
       );
       alert('Request sent successfully!');
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to send request');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Failed to send request');
+      } else {
+        alert('Unexpected error sending request');
+      }
     }
   };
 
@@ -235,32 +319,31 @@ const AllUser: React.FC = () => {
   const handleClose = () => setOpenModal(false);
 
   const fetchReceivedRequests = async () => {
-     if (!token || !userId) {
-    alert('You must be logged in!');
-    return;
-  }
-   console.log('Token in frontend:', token);
-   console.log('Current User ID (frontend):', userId);
+    if (!token || !userId) {
+      alert('You must be logged in!');
+      return;
+    }
 
     try {
-      const res = await axios.get('http://localhost:5000/api/users/received-requests', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(res, "received-requests");
-      
-console.log('Response status:', res.status);
-  console.log('Response data:', res.data);
+      const response = await axios.get<{ requests: Request[] }>(
+        'http://localhost:5000/api/users/received-requests',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      setReceivedRequests(res.data.requests);
+      setReceivedRequests(response.data.requests);
       handleOpen();
 
-      
-      const idsArray = res.data.requests.map((req: any) => [req.senderId._id, req.receiverId]);
-      console.log('Array of [senderId, receiverId]:', idsArray);
+      const idsArray: [string, string][] = response.data.requests.map((req) => [
+        req.senderId._id,
+        req.receiverId,
+      ]);
 
-    } catch (error: any) {
+      console.log('Array of [senderId, receiverId]:', idsArray);
+    } catch {
       alert('Failed to fetch received requests');
     }
   };
@@ -281,19 +364,21 @@ console.log('Response status:', res.status);
         User List
       </Typography>
 
-      {/* <Button
+      {/* Uncomment to show "View Requests" button
+      <Button
         variant="contained"
         color="success"
         onClick={fetchReceivedRequests}
         sx={{ width: 'fit-content', mb: 2 }}
       >
         View Requests
-      </Button> */}
+      </Button>
+      */}
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {users.map((user, index) => (
+        {users.map((user) => (
           <Paper
-            key={index}
+            key={user._id}
             elevation={3}
             sx={{
               p: 2,
@@ -337,11 +422,7 @@ console.log('Response status:', res.status);
             <Typography>No requests received.</Typography>
           ) : (
             receivedRequests.map((req, index) => (
-              <Paper
-                key={index}
-                elevation={2}
-                sx={{ p: 2, mb: 1 }}
-              >
+              <Paper key={index} elevation={2} sx={{ p: 2, mb: 1 }}>
                 <Typography>
                   <strong>Name:</strong> {req.senderId?.name}
                 </Typography>

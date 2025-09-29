@@ -29,7 +29,7 @@ export default function RequestView() {
 
   const fetchRequests = useCallback(async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/requests?userId=${userId}`, {
+      const res = await fetch(`https://vinayak-devias-backend.onrender.com/api/users/requests?userId=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,7 +64,7 @@ export default function RequestView() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/users/requests/${selectedRequest._id}/accept`,
+        `https://vinayak-devias-backend.onrender.com/api/users/requests/${selectedRequest._id}/accept`,
         {
           method: 'POST',
           headers: {
@@ -88,7 +88,7 @@ export default function RequestView() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/users/requests/${selectedRequest._id}/reject`,
+        `https://vinayak-devias-backend.onrender.com/api/users/requests/${selectedRequest._id}/reject`,
         {
           method: 'POST',
           headers: {

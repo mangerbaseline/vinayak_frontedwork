@@ -11,7 +11,7 @@ import {
   Modal,
 } from '@mui/material';
 
-// ✅ Add a proper type for items returned by the API
+// Add a proper type for items returned by the API
 type SummaryItem = string | { summary: string };
 
 const style = {
@@ -35,7 +35,7 @@ const Summaryform = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const API_URL = 'http://localhost:5000/api/users/summaries';
+  const API_URL = 'https://vinayak-devias-backend.onrender.com/api/users/summaries';
 
   useEffect(() => {
     const fetchSummaries = async () => {

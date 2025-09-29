@@ -284,7 +284,7 @@ const userDetailsString = hasWindow ? globalThis.window.localStorage.getItem('us
 
   useEffect(() => {
     axios
-      .get<User[]>('http://localhost:5000/api/users')
+      .get<User[]>('https://vinayak-devias-backend.onrender.com/api/users')
       .then((response) => {
         setUsers(response.data);
       })
@@ -301,7 +301,7 @@ const userDetailsString = hasWindow ? globalThis.window.localStorage.getItem('us
 
     try {
       await axios.post(
-        'http://localhost:5000/api/users/send-request',
+        'https://vinayak-devias-backend.onrender.com/api/users/send-request',
         { toUserId: receiverId },
         {
           headers: {
@@ -336,7 +336,7 @@ const userDetailsString = hasWindow ? globalThis.window.localStorage.getItem('us
 
     try {
       const response = await axios.get<{ requests: Request[] }>(
-        'http://localhost:5000/api/users/received-requests',
+        'https://vinayak-devias-backend.onrender.com/api/users/received-requests',
         {
           headers: {
             Authorization: `Bearer ${token}`,
